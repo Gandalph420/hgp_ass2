@@ -68,8 +68,8 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         saveAction.triggered.connect(
             self.save)  # when the menu option is selected or the shortcut is used the save slot is triggered, documenation: https://doc.qt.io/qt-5/qaction.html#triggered
 
-        # load menu item
-        openAction = QAction(QIcon("./icons/save.png"), "Load", self)
+        # open menu item
+        openAction = QAction(QIcon("./icons/save.png"), "Load", self)  # TODO Change ICON
         openAction.setShortcut("Ctrl+L")
         fileMenu.addAction(openAction)
         openAction.triggered.connect(self.open)
@@ -80,6 +80,12 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         fileMenu.addAction(clearAction)  # add this action to the file menu
         clearAction.triggered.connect(
             self.clear)  # when the menu option is selected or the shortcut is used the clear slot is triggered
+
+        # close
+        closeAction = QAction(QIcon("./icons/save.png"), "Exit", self)  # TODO Change ICON
+        closeAction.setShortcut("Ctrl+L")
+        fileMenu.addAction(closeAction)
+        closeAction.triggered.connect(self.close)
 
         # brush thickness
         threepxAction = QAction(QIcon("./icons/threepx.png"), "3px", self)
