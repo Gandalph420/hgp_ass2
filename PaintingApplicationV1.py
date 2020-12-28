@@ -68,6 +68,12 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         saveAction.triggered.connect(
             self.save)  # when the menu option is selected or the shortcut is used the save slot is triggered, documenation: https://doc.qt.io/qt-5/qaction.html#triggered
 
+        # load menu item
+        openAction = QAction(QIcon("./icons/save.png"), "Load", self)
+        openAction.setShortcut("Ctrl+L")
+        fileMenu.addAction(openAction)
+        openAction.triggered.connect(self.open)
+
         # clear
         clearAction = QAction(QIcon("./icons/clear.png"), "Clear", self)  # create a clear action with a png as an icon
         clearAction.setShortcut("Ctrl+C")  # connect this clear action to a keyboard shortcut
