@@ -7,10 +7,12 @@
 # PyQt documentation links are prefixed with the word 'documentation' in the code below and can be accessed automatically
 #  in PyCharm using the following technique https://www.jetbrains.com/help/pycharm/inline-documentation.html
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog
-from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QPixmap
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QDockWidget, QGridLayout, QSlider, QWidget, \
+    QVBoxLayout, QLabel, QRadioButton, QHBoxLayout, QButtonGroup, QGroupBox
+from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QPixmap, QColor
 import sys
 from PyQt5.QtCore import Qt, QPoint
+from Qt import QtGui
 
 
 class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/qmainwindow.html
@@ -46,7 +48,8 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         # draw settings (default)
         self.drawing = False
         self.brushSize = 3
-        self.brushColor = Qt.black  # documenation: https://doc.qt.io/qtforpython/PySide2/QtCore/Qt.html
+        self.brushColor = Qt.black
+        self.brushLineType = Qt.SolidLine  # documenation: https://doc.qt.io/qtforpython/PySide2/QtCore/Qt.html
 
         # reference to last point recorded by mouse
         self.lastPoint = QPoint()  # documenation: https://doc.qt.io/qt-5/qpoint.html
@@ -129,7 +132,81 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         brushColorMenu.addAction(yellowAction);
         yellowAction.triggered.connect(self.yellow)
 
+        # size Slider
+        lineSize = QLabel("Line size")
+        self.sizeSlider = QSlider(Qt.Horizontal)
+        self.sizeSlider.setMinimum(3)
+        self.sizeSlider.setMaximum(9)
+        self.sizeSlider.setTickInterval(2)
+        self.sizeSlider.setSingleStep(2)  # TODO doesn´t seem to work with the steps
+        self.sizeSlider.setTickPosition(QSlider.TicksBelow)
+        self.sizeSlider.valueChanged.connect(self.sliderEvent)
+        self.selectedLineSize = QLabel(str(self.sizeSlider.value()) + " px")
+
+        # line Type RadioButton
+        vBox = QGridLayout()
+        buttonGroup = QButtonGroup()
+
+        solidLine = QRadioButton("Solid", self)
+        solidLine.clicked.connect(self.solidLine)
+        buttonGroup.addButton(solidLine)
+        solidLine.setChecked(True)
+
+        dashLine = QRadioButton("Dash", self)
+        dashLine.clicked.connect(self.dashLine)
+        buttonGroup.addButton(dashLine)
+
+        dotLine = QRadioButton("Dot", self)
+        dotLine.clicked.connect(self.dotLine)
+        buttonGroup.addButton(dotLine)
+
+        dashDotLine = QRadioButton("DashDot", self)
+        dashDotLine.clicked.connect(self.dashDotLine)
+        buttonGroup.addButton(dashDotLine)
+
+        dashDotDotLine = QRadioButton("DashDotDot", self)
+        dashDotDotLine.clicked.connect(self.dashDotDotLine)
+        buttonGroup.addButton(dashDotDotLine)
+
+        vBox.addWidget(solidLine, 0, 0)
+        vBox.addWidget(dashLine, 1, 0)
+        vBox.addWidget(dotLine, 2, 0)
+        vBox.addWidget(dashDotLine, 3, 0)
+        vBox.addWidget(dashDotDotLine, 4, 0)
+
+        # self.boxLayout.addWidget(buttonGroup)
+
+        # dock widget
+        self.docked = QDockWidget("Dockwidget", self)
+        self.docked.setFloating(True)
+        # self.addDockWidget(Qt.LeftDockWidgetArea, self.docked)
+        self.dockWidget = QWidget(self)
+        self.docked.setWidget(self.dockWidget)
+        self.dockWidget.setLayout(QGridLayout())
+
+        self.dockWidget.layout().addWidget(lineSize, 0, 0)
+        self.dockWidget.layout().addWidget(self.sizeSlider, 0, 1)
+        self.dockWidget.layout().addWidget(self.selectedLineSize, 1, 0)
+        # self.dockWidget.layout().addWidget(vBox, 2, 0)
+        self.dockWidget.layout().addWidget(solidLine, 2, 0)
+        self.dockWidget.layout().addWidget(dashLine, 3, 0)
+        self.dockWidget.layout().addWidget(dotLine, 4, 0)
+        self.dockWidget.layout().addWidget(dashDotLine, 5, 0)
+        self.dockWidget.layout().addWidget(dashDotDotLine, 6, 0)
+
     # event handlers
+    def sliderEvent(self):
+        val = self.sizeSlider.value()
+        self.selectedLineSize.setText(str(val) + " px")
+        if (val == 3):
+            self.threepx()
+        elif (val == 5):
+            self.fivepx()
+        elif (val == 7):
+            self.sevenpx()
+        elif (val == 9):
+            self.ninepx()
+
     def mousePressEvent(self,
                         event):  # when the mouse is pressed, documentation: https://doc.qt.io/qt-5/qwidget.html#mousePressEvent
         if event.button() == Qt.LeftButton:  # if the pressed button is the left button
@@ -142,7 +219,7 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         if event.buttons() & Qt.LeftButton & self.drawing:  # if there was a press, and it was the left button and we are in drawing mode
             painter = QPainter(self.image)  # object which allows drawing to take place on an image
             # allows the selection of brush colour, brish size, line type, cap type, join type. Images available here http://doc.qt.io/qt-5/qpen.html
-            painter.setPen(QPen(self.brushColor, self.brushSize, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            painter.setPen(QPen(self.brushColor, self.brushSize, self.brushLineType, Qt.RoundCap, Qt.RoundJoin))
             painter.drawLine(self.lastPoint,
                              event.pos())  # draw a line from the point of the orginal press to the point to where the mouse was dragged to
             self.lastPoint = event.pos()  # set the last point to refer to the point we have just moved to, this helps when drawing the next line segment
@@ -203,6 +280,21 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
 
     def yellow(self):
         self.brushColor = Qt.yellow
+
+    def solidLine(self):
+        self.brushLineType = Qt.SolidLine
+
+    def dashLine(self):
+        self.brushLineType = Qt.DashLine
+
+    def dotLine(self):
+        self.brushLineType = Qt.DotLine
+
+    def dashDotLine(self):
+        self.brushLineType = Qt.DashDotLine
+
+    def dashDotDotLine(self):
+        self.brushLineType = Qt.DashDotDotLine
 
     # open a file
     def open(self):
