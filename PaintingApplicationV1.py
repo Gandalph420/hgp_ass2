@@ -8,7 +8,7 @@
 #  in PyCharm using the following technique https://www.jetbrains.com/help/pycharm/inline-documentation.html
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QDockWidget, QGridLayout, QSlider, QWidget, \
-    QVBoxLayout, QLabel, QRadioButton, QHBoxLayout, QButtonGroup, QGroupBox
+    QVBoxLayout, QLabel, QRadioButton, QHBoxLayout, QButtonGroup, QGroupBox, QComboBox
 from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QPixmap, QColor
 import sys
 from PyQt5.QtCore import Qt, QPoint
@@ -49,6 +49,8 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.drawing = False
         self.brushSize = 3
         self.brushColor = Qt.black
+        self.brushCapType = Qt.RoundCap
+        self.brushJoinType = Qt.RoundJoin
         self.brushLineType = Qt.SolidLine  # documenation: https://doc.qt.io/qtforpython/PySide2/QtCore/Qt.html
 
         # reference to last point recorded by mouse
@@ -144,37 +146,95 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.selectedLineSize = QLabel(str(self.sizeSlider.value()) + " px")
 
         # line Type RadioButton
-        vBox = QGridLayout()
-        buttonGroup = QButtonGroup()
+        lineTypebuttonGroup = QButtonGroup()
+        lineTypeLabel = QLabel("Line Type")
 
         solidLine = QRadioButton("Solid", self)
         solidLine.clicked.connect(self.solidLine)
-        buttonGroup.addButton(solidLine)
+        lineTypebuttonGroup.addButton(solidLine)
         solidLine.setChecked(True)
 
         dashLine = QRadioButton("Dash", self)
         dashLine.clicked.connect(self.dashLine)
-        buttonGroup.addButton(dashLine)
+        lineTypebuttonGroup.addButton(dashLine)
 
         dotLine = QRadioButton("Dot", self)
         dotLine.clicked.connect(self.dotLine)
-        buttonGroup.addButton(dotLine)
+        lineTypebuttonGroup.addButton(dotLine)
 
         dashDotLine = QRadioButton("DashDot", self)
         dashDotLine.clicked.connect(self.dashDotLine)
-        buttonGroup.addButton(dashDotLine)
+        lineTypebuttonGroup.addButton(dashDotLine)
 
         dashDotDotLine = QRadioButton("DashDotDot", self)
         dashDotDotLine.clicked.connect(self.dashDotDotLine)
-        buttonGroup.addButton(dashDotDotLine)
+        lineTypebuttonGroup.addButton(dashDotDotLine)
 
-        vBox.addWidget(solidLine, 0, 0)
-        vBox.addWidget(dashLine, 1, 0)
-        vBox.addWidget(dotLine, 2, 0)
-        vBox.addWidget(dashDotLine, 3, 0)
-        vBox.addWidget(dashDotDotLine, 4, 0)
+        lineTypeBox = QGroupBox("Line Type")
+        lineTypeVBox = QVBoxLayout()
+        lineTypeBox.setLayout(lineTypeVBox)
+        lineTypeVBox.addWidget(solidLine)
+        lineTypeVBox.addWidget(dashLine)
+        lineTypeVBox.addWidget(dotLine)
+        lineTypeVBox.addWidget(dashDotLine)
+        lineTypeVBox.addWidget(dashDotDotLine)
 
-        # self.boxLayout.addWidget(buttonGroup)
+        # cap Type radio button
+        capTypeButtonGroup = QButtonGroup()
+        capTypeLabel = QLabel("Cap Type")
+
+        roundCapType = QRadioButton("Round", self)
+        roundCapType.clicked.connect(self.roundCapType)
+        capTypeButtonGroup.addButton(roundCapType)
+        roundCapType.setChecked(True)
+
+        flatCapType = QRadioButton("Flat", self)
+        flatCapType.clicked.connect(self.flatCapType)
+        capTypeButtonGroup.addButton(flatCapType)
+
+        squareCapType = QRadioButton("Square", self)
+        squareCapType.clicked.connect(self.squareCapType)
+        capTypeButtonGroup.addButton(squareCapType)
+
+        capTypeBox = QGroupBox("Cap Type")
+        capTypeVBox = QVBoxLayout()
+        capTypeBox.setLayout(capTypeVBox)
+        capTypeVBox.addWidget(roundCapType)
+        capTypeVBox.addWidget(flatCapType)
+        capTypeVBox.addWidget(squareCapType)
+
+        # join Type radio button
+        joinTypeButtonGroup = QButtonGroup()
+        joinTypeLabel = QLabel("Join Type")
+
+        roundJoinType = QRadioButton("Round", self)
+        roundJoinType.clicked.connect(self.roundJoinType)
+        joinTypeButtonGroup.addButton(roundJoinType)
+        roundJoinType.setChecked(True)
+
+        miterJoinType = QRadioButton("Miter", self)
+        miterJoinType.clicked.connect(self.miterJoinType)
+        joinTypeButtonGroup.addButton(miterJoinType)
+
+        bevelJoinType = QRadioButton("Bevel", self)
+        bevelJoinType.clicked.connect(self.bevelJoinType)
+        joinTypeButtonGroup.addButton(bevelJoinType)
+
+        joinTypeBox = QGroupBox("Join Type")
+        joinTypeVBox = QVBoxLayout()
+        joinTypeBox.setLayout(joinTypeVBox)
+        joinTypeVBox.addWidget(roundJoinType)
+        joinTypeVBox.addWidget(bevelJoinType)
+        joinTypeVBox.addWidget(miterJoinType)
+
+        # color
+        colorLabel = QLabel("Color")
+        self.colorCombobox = QComboBox()
+        self.colorCombobox.addItem("Black")
+        self.colorCombobox.addItem("Red")
+        self.colorCombobox.addItem("Green")
+        self.colorCombobox.addItem("Yellow")
+        self.colorCombobox.currentIndexChanged.connect(self.colorComboboxEvent)
 
         # dock widget
         self.docked = QDockWidget("Dockwidget", self)
@@ -186,13 +246,31 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
 
         self.dockWidget.layout().addWidget(lineSize, 0, 0)
         self.dockWidget.layout().addWidget(self.sizeSlider, 0, 1)
-        self.dockWidget.layout().addWidget(self.selectedLineSize, 1, 0)
-        # self.dockWidget.layout().addWidget(vBox, 2, 0)
-        self.dockWidget.layout().addWidget(solidLine, 2, 0)
-        self.dockWidget.layout().addWidget(dashLine, 3, 0)
-        self.dockWidget.layout().addWidget(dotLine, 4, 0)
-        self.dockWidget.layout().addWidget(dashDotLine, 5, 0)
-        self.dockWidget.layout().addWidget(dashDotDotLine, 6, 0)
+        self.dockWidget.layout().addWidget(self.selectedLineSize, 0, 2)
+
+        self.dockWidget.layout().addWidget(colorLabel, 1, 0)
+        self.dockWidget.layout().addWidget(self.colorCombobox, 1, 1)
+
+        #self.dockWidget.layout().addWidget(lineTypeLabel, 2, 0)
+        #self.dockWidget.layout().addWidget(solidLine, 2, 1)
+        #self.dockWidget.layout().addWidget(dashLine, 2, 2)
+        #self.dockWidget.layout().addWidget(dotLine, 2, 3)
+        #self.dockWidget.layout().addWidget(dashDotLine, 2, 4)
+        #self.dockWidget.layout().addWidget(dashDotDotLine, 2, 5)
+        self.dockWidget.layout().addWidget(lineTypeBox, 2, 0)
+
+        #self.dockWidget.layout().addWidget(capTypeLabel, 3, 0)
+        #self.dockWidget.layout().addWidget(roundCapType, 3, 1)
+        #self.dockWidget.layout().addWidget(flatCapType, 3, 2)
+        #self.dockWidget.layout().addWidget(squareCapType, 3, 3)
+        self.dockWidget.layout().addWidget(capTypeBox, 3, 0)
+
+        #self.dockWidget.layout().addWidget(joinTypeLabel, 4, 0)
+        #self.dockWidget.layout().addWidget(roundJoinType, 4, 1)
+        #self.dockWidget.layout().addWidget(miterJoinType, 4, 2)
+        #self.dockWidget.layout().addWidget(bevelJoinType, 4, 3)
+        self.dockWidget.layout().addWidget(joinTypeBox, 3, 1)
+
 
     # event handlers
     def sliderEvent(self):
@@ -207,6 +285,17 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         elif (val == 9):
             self.ninepx()
 
+    def colorComboboxEvent(self):
+        val = self.colorCombobox.currentText()
+        if (val == "Black"):
+            self.black()
+        elif (val == "Red"):
+            self.red()
+        elif (val == "Yellow"):
+            self.yellow()
+        elif (val == "Green"):
+            self.green()
+
     def mousePressEvent(self,
                         event):  # when the mouse is pressed, documentation: https://doc.qt.io/qt-5/qwidget.html#mousePressEvent
         if event.button() == Qt.LeftButton:  # if the pressed button is the left button
@@ -219,7 +308,8 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         if event.buttons() & Qt.LeftButton & self.drawing:  # if there was a press, and it was the left button and we are in drawing mode
             painter = QPainter(self.image)  # object which allows drawing to take place on an image
             # allows the selection of brush colour, brish size, line type, cap type, join type. Images available here http://doc.qt.io/qt-5/qpen.html
-            painter.setPen(QPen(self.brushColor, self.brushSize, self.brushLineType, Qt.RoundCap, Qt.RoundJoin))
+            painter.setPen(
+                QPen(self.brushColor, self.brushSize, self.brushLineType, self.brushCapType, self.brushJoinType))
             painter.drawLine(self.lastPoint,
                              event.pos())  # draw a line from the point of the orginal press to the point to where the mouse was dragged to
             self.lastPoint = event.pos()  # set the last point to refer to the point we have just moved to, this helps when drawing the next line segment
@@ -254,6 +344,21 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.image.fill(Qt.white)  # fill the image with white, documentaiton: https://doc.qt.io/qt-5/qimage.html#fill-2
         self.update()  # call the update method of the widget which calls the paintEvent of this class
 
+    def setBrushSize(self, val):
+        self.brushSize = val
+
+    def setBrushColor(self, val):
+        self.brushColor = val
+
+    def setBrushLineType(self, val):
+        self.brushLineType = val
+
+    def setCapType(self, val):
+        self.brushCapType = val
+
+    def setJoinType(self, val):
+        self.brushJoinType = val
+
     def threepx(self):  # the brush size is set to 3
         self.brushSize = 3
 
@@ -267,9 +372,6 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.brushSize = 9
 
     def black(self):  # the brush color is set to black
-        self.brushColor = Qt.black
-
-    def black(self):
         self.brushColor = Qt.black
 
     def red(self):
@@ -295,6 +397,24 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
 
     def dashDotDotLine(self):
         self.brushLineType = Qt.DashDotDotLine
+
+    def roundCapType(self):
+        self.brushCapType = Qt.RoundCap
+
+    def flatCapType(self):
+        self.brushCapType = Qt.FlatCap
+
+    def squareCapType(self):
+        self.brushCapType = Qt.SquareCap
+
+    def roundJoinType(self):
+        self.brushJoinType = Qt.RoundJoin
+
+    def miterJoinType(self):
+        self.brushJoinType = Qt.MiterJoin
+
+    def bevelJoinType(self):
+        self.brushJoinType = Qt.BevelJoin
 
     # open a file
     def open(self):
