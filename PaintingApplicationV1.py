@@ -8,7 +8,7 @@
 #  in PyCharm using the following technique https://www.jetbrains.com/help/pycharm/inline-documentation.html
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QDockWidget, QGridLayout, QSlider, QWidget, \
-    QVBoxLayout, QLabel, QRadioButton, QHBoxLayout, QButtonGroup, QGroupBox, QComboBox
+    QVBoxLayout, QLabel, QRadioButton, QHBoxLayout, QButtonGroup, QGroupBox, QComboBox, QMessageBox, QColorDialog
 from PyQt5.QtGui import QIcon, QImage, QPainter, QPen, QPixmap, QColor
 import sys
 from PyQt5.QtCore import Qt, QPoint
@@ -62,16 +62,26 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
             " File")  # add the file menu to the menu bar, the space is required as "File" is reserved in Mac
         brushSizeMenu = mainMenu.addMenu(" Brush Size")  # add the "Brush Size" menu to the menu bar
         brushColorMenu = mainMenu.addMenu(" Brush Colour")  # add the "Brush Colour" menu to the menu bar
+        helpMenu = mainMenu.addMenu("Help")
+
+        # help menu item
+        helpAction = QAction(QIcon("icons/qm.png"), "Help", self)
+        helpAction.setShortcut("Ctrl+Alt+H")
+        helpAction.triggered.connect(self.helpInformation)
+        helpMenu.addAction(helpAction)
+
+        # about menu item
+        aboutAction = QAction(QIcon("icons/i.png"), "About", self)
+        aboutAction.setShortcut("Ctrl+Alt+A")
+        aboutAction.triggered.connect(self.aboutInformation)
+        helpMenu.addAction(aboutAction)
 
         # save menu item
-        saveAction = QAction(QIcon("./icons/save.png"), "Save",
-                             self)  # create a save action with a png as an icon, documenation: https://doc.qt.io/qt-5/qaction.html
-        saveAction.setShortcut(
-            "Ctrl+S")  # connect this save action to a keyboard shortcut, documentation: https://doc.qt.io/qt-5/qaction.html#shortcut-prop
-        fileMenu.addAction(
-            saveAction)  # add the save action to the file menu, documentation: https://doc.qt.io/qt-5/qwidget.html#addAction
+        saveAction = QAction(QIcon("./icons/save.png"), "Save", self)  # create a save action with a png as an icon
+        saveAction.setShortcut("Ctrl+S")  # connect this save action to a keyboard shortcut
+        fileMenu.addAction(saveAction)  # add the save action to the file menu
         saveAction.triggered.connect(
-            self.save)  # when the menu option is selected or the shortcut is used the save slot is triggered, documenation: https://doc.qt.io/qt-5/qaction.html#triggered
+            self.save)  # when the menu option is selected or the shortcut is used the save slot is triggered
 
         # open menu item
         openAction = QAction(QIcon("./icons/save.png"), "Load", self)  # TODO Change ICON
@@ -140,7 +150,7 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.sizeSlider.setMinimum(3)
         self.sizeSlider.setMaximum(9)
         self.sizeSlider.setTickInterval(2)
-        self.sizeSlider.setSingleStep(2)  # TODO doesn´t seem to work with the steps
+        self.sizeSlider.setSingleStep(2)
         self.sizeSlider.setTickPosition(QSlider.TicksBelow)
         self.sizeSlider.valueChanged.connect(self.sliderEvent)
         self.selectedLineSize = QLabel(str(self.sizeSlider.value()) + " px")
@@ -184,15 +194,18 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         capTypeLabel = QLabel("Cap Type")
 
         roundCapType = QRadioButton("Round", self)
+        roundCapType.setIcon(QIcon("icons/black_circle.png"))
         roundCapType.clicked.connect(self.roundCapType)
         capTypeButtonGroup.addButton(roundCapType)
         roundCapType.setChecked(True)
 
         flatCapType = QRadioButton("Flat", self)
+        flatCapType.setIcon(QIcon("icons/black_rectangle.png"))
         flatCapType.clicked.connect(self.flatCapType)
         capTypeButtonGroup.addButton(flatCapType)
 
         squareCapType = QRadioButton("Square", self)
+        squareCapType.setIcon(QIcon("icons/black.png"))
         squareCapType.clicked.connect(self.squareCapType)
         capTypeButtonGroup.addButton(squareCapType)
 
@@ -230,16 +243,19 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         # color
         colorLabel = QLabel("Color")
         self.colorCombobox = QComboBox()
-        self.colorCombobox.addItem("Black")
-        self.colorCombobox.addItem("Red")
-        self.colorCombobox.addItem("Green")
-        self.colorCombobox.addItem("Yellow")
+        self.colorCombobox.addItem(QIcon("icons/black.png"), "Black")
+        self.colorCombobox.addItem(QIcon("icons/red.png"), "Red")
+        self.colorCombobox.addItem(QIcon("icons/green.png"), "Green")
+        self.colorCombobox.addItem(QIcon("icons/yellow.png"), "Yellow")
+        self.colorCombobox.addItem("Custom Color")
         self.colorCombobox.currentIndexChanged.connect(self.colorComboboxEvent)
 
         # dock widget
-        self.docked = QDockWidget("Dockwidget", self)
+        self.docked = QDockWidget("Dockwidget")
+        self.addDockWidget(Qt.RightDockWidgetArea, self.docked)
         self.docked.setFloating(True)
-        # self.addDockWidget(Qt.LeftDockWidgetArea, self.docked)
+        self.docked.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self.docked.setAllowedAreas(Qt.RightDockWidgetArea)
         self.dockWidget = QWidget(self)
         self.docked.setWidget(self.dockWidget)
         self.dockWidget.setLayout(QGridLayout())
@@ -251,39 +267,17 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.dockWidget.layout().addWidget(colorLabel, 1, 0)
         self.dockWidget.layout().addWidget(self.colorCombobox, 1, 1)
 
-        #self.dockWidget.layout().addWidget(lineTypeLabel, 2, 0)
-        #self.dockWidget.layout().addWidget(solidLine, 2, 1)
-        #self.dockWidget.layout().addWidget(dashLine, 2, 2)
-        #self.dockWidget.layout().addWidget(dotLine, 2, 3)
-        #self.dockWidget.layout().addWidget(dashDotLine, 2, 4)
-        #self.dockWidget.layout().addWidget(dashDotDotLine, 2, 5)
-        self.dockWidget.layout().addWidget(lineTypeBox, 2, 0)
+        self.dockWidget.layout().addWidget(lineTypeBox, 3, 0)
 
-        #self.dockWidget.layout().addWidget(capTypeLabel, 3, 0)
-        #self.dockWidget.layout().addWidget(roundCapType, 3, 1)
-        #self.dockWidget.layout().addWidget(flatCapType, 3, 2)
-        #self.dockWidget.layout().addWidget(squareCapType, 3, 3)
-        self.dockWidget.layout().addWidget(capTypeBox, 3, 0)
+        self.dockWidget.layout().addWidget(capTypeBox, 2, 0)
 
-        #self.dockWidget.layout().addWidget(joinTypeLabel, 4, 0)
-        #self.dockWidget.layout().addWidget(roundJoinType, 4, 1)
-        #self.dockWidget.layout().addWidget(miterJoinType, 4, 2)
-        #self.dockWidget.layout().addWidget(bevelJoinType, 4, 3)
-        self.dockWidget.layout().addWidget(joinTypeBox, 3, 1)
-
+        self.dockWidget.layout().addWidget(joinTypeBox, 2, 1)
 
     # event handlers
     def sliderEvent(self):
         val = self.sizeSlider.value()
         self.selectedLineSize.setText(str(val) + " px")
-        if (val == 3):
-            self.threepx()
-        elif (val == 5):
-            self.fivepx()
-        elif (val == 7):
-            self.sevenpx()
-        elif (val == 9):
-            self.ninepx()
+        self.setBrushSize(val)
 
     def colorComboboxEvent(self):
         val = self.colorCombobox.currentText()
@@ -295,16 +289,16 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
             self.yellow()
         elif (val == "Green"):
             self.green()
+        elif(val == "Custom Color"):
+            self.colorPicker()
 
-    def mousePressEvent(self,
-                        event):  # when the mouse is pressed, documentation: https://doc.qt.io/qt-5/qwidget.html#mousePressEvent
+    def mousePressEvent(self, event):  # when the mouse is pressed
         if event.button() == Qt.LeftButton:  # if the pressed button is the left button
             self.drawing = True  # enter drawing mode
             self.lastPoint = event.pos()  # save the location of the mouse press as the lastPoint
             print(self.lastPoint)  # print the lastPoint for debigging purposes
 
-    def mouseMoveEvent(self,
-                       event):  # when the mouse is moved, documenation: documentation: https://doc.qt.io/qt-5/qwidget.html#mouseMoveEvent
+    def mouseMoveEvent(self, event):  # when the mouse is moved
         if event.buttons() & Qt.LeftButton & self.drawing:  # if there was a press, and it was the left button and we are in drawing mode
             painter = QPainter(self.image)  # object which allows drawing to take place on an image
             # allows the selection of brush colour, brish size, line type, cap type, join type. Images available here http://doc.qt.io/qt-5/qpen.html
@@ -315,9 +309,8 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
             self.lastPoint = event.pos()  # set the last point to refer to the point we have just moved to, this helps when drawing the next line segment
             self.update()  # call the update method of the widget which calls the paintEvent of this class
 
-    def mouseReleaseEvent(self,
-                          event):  # when the mouse is released, documentation: https://doc.qt.io/qt-5/qwidget.html#mouseReleaseEvent
-        if event.button == Qt.LeftButton:  # if the released button is the left button, documenation: https://doc.qt.io/qt-5/qt.html#MouseButton-enum ,
+    def mouseReleaseEvent(self, event):  # when the mouse is released
+        if event.button == Qt.LeftButton:  # if the released button is the left button
             self.drawing = False  # exit drawing mode
 
     # paint events
@@ -415,6 +408,27 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
 
     def bevelJoinType(self):
         self.brushJoinType = Qt.BevelJoin
+
+    def colorPicker(self):
+        color = QColorDialog.getColor()
+        self.setBrushColor(color)
+
+    def aboutInformation(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("About")
+        msg.setStandardButtons(QMessageBox.Close)
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Paint application made for the second assignment in HGP. For more information check the documentation.")
+        msg.exec_()
+
+    def helpInformation(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Help")
+        msg.setStandardButtons(QMessageBox.Close)
+        msg.setIcon(QMessageBox.Question)
+        msg.setText(
+            "For help and explantion of the features, please check the documentation")
+        msg.exec_()
 
     # open a file
     def open(self):
