@@ -84,7 +84,7 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
             self.save)  # when the menu option is selected or the shortcut is used the save slot is triggered
 
         # open menu item
-        openAction = QAction(QIcon("./icons/save.png"), "Load", self)  # TODO Change ICON
+        openAction = QAction(QIcon("./icons/open.png"), "Load", self)  # TODO Change ICON
         openAction.setShortcut("Ctrl+L")
         fileMenu.addAction(openAction)
         openAction.triggered.connect(self.open)
@@ -97,14 +97,14 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
             self.clear)  # when the menu option is selected or the shortcut is used the clear slot is triggered
 
         # close
-        closeAction = QAction(QIcon("./icons/save.png"), "Exit", self)  # TODO Change ICON
-        closeAction.setShortcut("Ctrl+L")
+        closeAction = QAction(QIcon("./icons/exit.png"), "Exit", self)
+        closeAction.setShortcut("Ctrl+E")
         fileMenu.addAction(closeAction)
         closeAction.triggered.connect(self.close)
 
         # brush thickness
         threepxAction = QAction(QIcon("./icons/threepx.png"), "3px", self)
-        threepxAction.setShortcut("Ctrl+3")  # TODO changed the control options to be numbers
+        threepxAction.setShortcut("Ctrl+3")
         brushSizeMenu.addAction(threepxAction)  # connect the action to the function below
         threepxAction.triggered.connect(self.threepx)
 
@@ -164,19 +164,19 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         lineTypebuttonGroup.addButton(solidLine)
         solidLine.setChecked(True)
 
-        dashLine = QRadioButton("Dash", self)
+        dashLine = QRadioButton("---Dash", self)
         dashLine.clicked.connect(self.dashLine)
         lineTypebuttonGroup.addButton(dashLine)
 
-        dotLine = QRadioButton("Dot", self)
+        dotLine = QRadioButton("···Dot", self)
         dotLine.clicked.connect(self.dotLine)
         lineTypebuttonGroup.addButton(dotLine)
 
-        dashDotLine = QRadioButton("DashDot", self)
+        dashDotLine = QRadioButton("-·DashDot", self)
         dashDotLine.clicked.connect(self.dashDotLine)
         lineTypebuttonGroup.addButton(dashDotLine)
 
-        dashDotDotLine = QRadioButton("DashDotDot", self)
+        dashDotDotLine = QRadioButton("-··DashDotDot", self)
         dashDotDotLine.clicked.connect(self.dashDotDotLine)
         lineTypebuttonGroup.addButton(dashDotDotLine)
 
@@ -251,11 +251,15 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
         self.colorCombobox.currentIndexChanged.connect(self.colorComboboxEvent)
 
         # dock widget
-        self.docked = QDockWidget("Dockwidget")
+        self.docked = QDockWidget("Paint Tools")
+
+        self.docked.setAllowedAreas(Qt.RightDockWidgetArea)
+
+        self.docked.setWindowIcon(QIcon("icons/option.png"))
         self.addDockWidget(Qt.RightDockWidgetArea, self.docked)
         self.docked.setFloating(True)
         self.docked.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
-        self.docked.setAllowedAreas(Qt.RightDockWidgetArea)
+        #self.docked.setAllowedAreas(Qt.RightDockWidgetArea)
         self.dockWidget = QWidget(self)
         self.docked.setWidget(self.dockWidget)
         self.dockWidget.setLayout(QGridLayout())
@@ -282,13 +286,13 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
     def colorComboboxEvent(self):
         val = self.colorCombobox.currentText()
         if (val == "Black"):
-            self.black()
+            self.setBrushColor(Qt.black)
         elif (val == "Red"):
-            self.red()
+            self.setBrushColor(Qt.red)
         elif (val == "Yellow"):
-            self.yellow()
+            self.setBrushColor(Qt.yellow)
         elif (val == "Green"):
-            self.green()
+            self.setBrushColor(Qt.green)
         elif(val == "Custom Color"):
             self.colorPicker()
 
@@ -354,27 +358,35 @@ class PaintingApplication(QMainWindow):  # documentation https://doc.qt.io/qt-5/
 
     def threepx(self):  # the brush size is set to 3
         self.brushSize = 3
+        self.sizeSlider.setValue(3)
 
     def fivepx(self):
         self.brushSize = 5
+        self.sizeSlider.setValue(5)
 
     def sevenpx(self):
         self.brushSize = 7
+        self.sizeSlider.setValue(7)
 
     def ninepx(self):
         self.brushSize = 9
+        self.sizeSlider.setValue(9)
 
     def black(self):  # the brush color is set to black
         self.brushColor = Qt.black
+        self.colorCombobox.setCurrentText("Black")
 
     def red(self):
         self.brushColor = Qt.red
+        self.colorCombobox.setCurrentText("Red")
 
     def green(self):
         self.brushColor = Qt.green
+        self.colorCombobox.setCurrentText("Green")
 
     def yellow(self):
         self.brushColor = Qt.yellow
+        self.colorCombobox.setCurrentText("Yellow")
 
     def solidLine(self):
         self.brushLineType = Qt.SolidLine
